@@ -54,3 +54,23 @@
     (is (not (seon? `{:a (1 2) :b {:c 3 :d []}}))) ; [] (aka array) is not a valid SEON structure
     (is (not (seon? `{:a (#{} 2) :b {:c 3 :d 4}}))) ; #{} (aka set) is not a valid SEON structure
     ))
+
+(deftest serialize-test
+  (testing "SEON serialization into string."
+    (is (= (serialize 1) "1"))
+    (is (= (serialize "1") "\"1\""))
+    (is (= (serialize false) "false"))
+    (is (= (serialize `()) "()"))
+    (is (= (serialize `(1 2 (3 4))) "(1 2 (3 4))"))
+    (is (= (serialize {:a "b" :c 2}) "{:a \"b\", :c 2}"))
+    ))
+
+(deftest unserialize-test
+  (testing "Parsing SEON from string."
+    (is (= (unserialize "1") 1))
+    (is (= (unserialize "\"1\"") "1"))
+    (is (= (unserialize "false") false))
+    (is (= (unserialize "()") `()))
+    (is (= (unserialize "(1 2 (3 4))") `(1 2 (3 4))))
+    (is (= (unserialize "{:a \"b\", :c 2}") {:a "b" :c 2}))
+    ))
