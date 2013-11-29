@@ -1,4 +1,4 @@
-(ns ru.nsu.ccfit.12222.seon-test
+(ns ru.nsu.ccfit.12222.seon.test.core_test
   (:require [clojure.test :refer :all]
             [ru.nsu.ccfit.12222.seon.core :refer :all]))
 

@@ -1,4 +1,4 @@
-(ns ru.nsu.ccfit.12222.seon-schema-test
+(ns ru.nsu.ccfit.12222.seon.test.schema_test
   (:use [ru.nsu.ccfit.12222.seon.core])
   (:use [ru.nsu.ccfit.12222.seon.schema])
   (:use [clojure.test])
