@@ -40,6 +40,10 @@
            [schema expr]
   (string? expr))
 
+(defmethod valid? "boolean"
+           [schema expr]
+  (or (true? expr) (false? expr)))
+
 (defmethod valid? "object"
   [schema expr]
   (and

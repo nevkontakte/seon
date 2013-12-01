@@ -70,6 +70,22 @@
           0))
     ))
 
+(deftest valid?-boolean-test
+  (testing "Boolean type validation."
+    (is (valid?
+          {:type "boolean"}
+          true))
+    (is (valid?
+          {:type "boolean"}
+          false))
+    (is (invalid?
+          {:type "boolean"}
+          1))
+    (is (invalid?
+          {:type "boolean"}
+          0))
+    ))
+
 (deftest valid?-object-test
   (testing "Object type validation."
     (testing "Object validation."
