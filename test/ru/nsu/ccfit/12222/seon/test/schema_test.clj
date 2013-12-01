@@ -4,34 +4,49 @@
   (:use [clojure.test])
   )
 
-(deftest validate-test
+(deftest valid?-test
   (testing "Exception on unknown exception type."
     (is (thrown-with-msg?
           Exception #"^Unknown schema type"
           (valid? {:type "unknown-type"} {})))
     )
-  (testing "Object validation."
+  )
+
+(deftest valid?-integer-test
+  (testing "Integer type validation."
     (is (valid?
-          {:type "object"}
-          {}))
-    (is (valid?
-          {:type "object" :properties {
-                                        :nested {:type "object"}
-                                        }}
-          {}))
-    (is (not (valid?
-               {:type "object" :properties {
-                                             :nested {:type "object" :required true}
-                                             }}
-               {})))
-    (is (valid?
-          {:type "object" :properties {
-                                        :nested {:type "object"}
-                                        }}
-          {:nested {}}))
-    (is (valid?
-          {:type "object" :properties {
-                                        :nested {:type "object" :required true}
-                                        }}
-          {:nested {}}))
+          {:type "integer"}
+          1))
+    (is (invalid?
+          {:type "integer"}
+          1.0))
+    ))
+
+(deftest valid?-object-test
+  (testing "Object type validation."
+    (testing "Object validation."
+      (is (valid?
+            {:type "object"}
+            {}))
+      (is (valid?
+            {:type "object" :properties {
+                                          :nested {:type "object"}
+                                          }}
+            {}))
+      (is (not (valid?
+                 {:type "object" :properties {
+                                               :nested {:type "object" :required true}
+                                               }}
+                 {})))
+      (is (valid?
+            {:type "object" :properties {
+                                          :nested {:type "object"}
+                                          }}
+            {:nested {}}))
+      (is (valid?
+            {:type "object" :properties {
+                                          :nested {:type "object" :required true}
+                                          }}
+            {:nested {}}))
+      )
     ))

@@ -6,10 +6,19 @@
           (fn [schema expr]
             (:type schema)))
 
+(defn invalid?
+  "Shortcut for (not (valid schema expr))."
+  [schema expr]
+  (not (valid? schema expr)))
+
 
 (defmethod valid? :default
   [schema expr]
   (throw (Exception. (str "Unknown schema type: " (serialize schema)))))
+
+(defmethod valid? "integer"
+  [schema expr]
+  (integer? expr))
 
 (defmethod valid? "object"
   [schema expr]
