@@ -114,3 +114,25 @@
             {:nested {}}))
       )
     ))
+
+(deftest valid?-array-test
+  (testing "Array type validation."
+    (is (valid?
+          {:type "array"}
+          `()))
+    (is (valid?
+          {:type "array"}
+          `(1 2 3)))
+    (is (invalid?
+          {:type "array"}
+          {}))
+    (is (valid?
+          {:type "array" :items {:type "integer"}}
+          `()))
+    (is (valid?
+          {:type "array" :items {:type "integer"}}
+          `(1 2 3)))
+    (is (invalid?
+          {:type "array" :items {:type "integer"}}
+          `(1 2.0 3)))
+    ))

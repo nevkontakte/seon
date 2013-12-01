@@ -55,3 +55,11 @@
                              true)
                            ) (:properties schema)))
       true)))
+
+(defmethod valid? "array"
+           [schema expr]
+  (and
+    (seq? expr)
+    (if (:items schema)
+      (every? true? (map (partial valid? (:items schema)) expr))
+      true)))
