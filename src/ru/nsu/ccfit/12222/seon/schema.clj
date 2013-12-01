@@ -20,6 +20,10 @@
   [schema expr]
   (integer? expr))
 
+(defmethod valid? "number"
+  [schema expr]
+  (or (float? expr) (integer? expr)))
+
 (defmethod valid? "object"
   [schema expr]
   (and

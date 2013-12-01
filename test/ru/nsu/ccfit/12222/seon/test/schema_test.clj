@@ -22,6 +22,19 @@
           1.0))
     ))
 
+(deftest valid?-number-test
+  (testing "Integer type validation."
+    (is (valid?
+          {:type "number"}
+          1))
+    (is (valid?
+          {:type "number"}
+          1.0))
+    (is (invalid?
+          {:type "number"}
+          "Not a number"))
+    ))
+
 (deftest valid?-object-test
   (testing "Object type validation."
     (testing "Object validation."
