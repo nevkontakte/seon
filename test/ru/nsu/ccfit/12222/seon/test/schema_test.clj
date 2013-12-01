@@ -8,5 +8,30 @@
   (testing "Exception on unknown exception type."
     (is (thrown-with-msg?
           Exception #"^Unknown schema type"
-          (validate {:type "unknown-type"} {})))
+          (valid? {:type "unknown-type"} {})))
+    )
+  (testing "Object validation."
+    (is (valid?
+          {:type "object"}
+          {}))
+    (is (valid?
+          {:type "object" :properties {
+                                        :nested {:type "object"}
+                                        }}
+          {}))
+    (is (not (valid?
+               {:type "object" :properties {
+                                             :nested {:type "object" :required true}
+                                             }}
+               {})))
+    (is (valid?
+          {:type "object" :properties {
+                                        :nested {:type "object"}
+                                        }}
+          {:nested {}}))
+    (is (valid?
+          {:type "object" :properties {
+                                        :nested {:type "object" :required true}
+                                        }}
+          {:nested {}}))
     ))
