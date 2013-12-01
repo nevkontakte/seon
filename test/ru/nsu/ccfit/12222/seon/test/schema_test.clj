@@ -20,6 +20,9 @@
     (is (invalid?
           {:type "integer"}
           1.0))
+    (is (invalid?
+          {:type "integer"}
+          nil))
     ))
 
 (deftest valid?-number-test
@@ -33,6 +36,9 @@
     (is (invalid?
           {:type "number"}
           "Not a number"))
+    (is (invalid?
+          {:type "number"}
+          nil))
     ))
 
 (deftest valid?-string-test
@@ -43,6 +49,25 @@
     (is (invalid?
           {:type "string"}
           1))
+    (is (invalid?
+          {:type "string"}
+          nil))
+    ))
+
+(deftest valid?-nil-test
+  (testing "Nil type validation."
+    (is (valid?
+          {:type "nil"}
+          nil))
+    (is (invalid?
+          {:type "nil"}
+          0))
+    (is (valid?
+          {:type "null"}
+          nil))
+    (is (invalid?
+          {:type "null"}
+          0))
     ))
 
 (deftest valid?-object-test

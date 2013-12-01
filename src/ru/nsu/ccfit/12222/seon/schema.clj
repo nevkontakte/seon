@@ -24,6 +24,18 @@
   [schema expr]
   (or (float? expr) (integer? expr)))
 
+(defn- valid?-nil
+  [schema expr]
+  (nil? expr))
+
+(defmethod valid? "null"
+           [schema expr]
+  (valid?-nil schema expr))
+
+(defmethod valid? "nil"
+           [schema expr]
+  (valid?-nil schema expr))
+
 (defmethod valid? "string"
            [schema expr]
   (string? expr))
