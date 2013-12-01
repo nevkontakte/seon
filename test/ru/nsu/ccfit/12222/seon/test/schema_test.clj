@@ -35,6 +35,16 @@
           "Not a number"))
     ))
 
+(deftest valid?-string-test
+  (testing "String type validation."
+    (is (valid?
+          {:type "string"}
+          "This is a string"))
+    (is (invalid?
+          {:type "string"}
+          1))
+    ))
+
 (deftest valid?-object-test
   (testing "Object type validation."
     (testing "Object validation."
