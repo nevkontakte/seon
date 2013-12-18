@@ -112,6 +112,11 @@
                                           :nested {:type "object" :required true}
                                           }}
             {:nested {}}))
+      (is (invalid?
+            {:type "object" :properties {
+                                          :nested {:type "object" :required true}
+                                          }}
+            {:nested 0}))
       )
     ))
 
