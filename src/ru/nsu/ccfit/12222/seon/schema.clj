@@ -1,6 +1,8 @@
 (ns ru.nsu.ccfit.12222.seon.schema
   (:use [ru.nsu.ccfit.12222.seon.core]))
 
+;; General valiadtion functions
+
 (defmulti valid?-type
           "Validate SEON expression against schema."
           (fn [schema expr]
@@ -23,13 +25,40 @@
   [schema expr]
   (throw (Exception. (str "Unknown schema type: " (serialize schema)))))
 
+
+;; Numbers validation
+
+(defn- valid?-multipleOf
+  [schema expr]
+  (if (:multipleOf schema)
+    (= (float (mod expr (:multipleOf schema)))  0.0)
+    true))
+
+(defn- valid?-maximum
+  [schema expr]
+  (let [pred (if (:exclusiveMaximum schema)
+               <
+               <=)]
+    (if (:maximum schema)
+      (pred expr (:maximum schema))
+      true))
+    )
+
 (defmethod valid?-type "integer"
   [schema expr]
-  (integer? expr))
+  (and
+    (integer? expr)
+    (valid?-multipleOf schema expr)
+    (valid?-maximum schema expr)))
 
 (defmethod valid?-type "number"
   [schema expr]
-  (or (float? expr) (integer? expr)))
+  (and
+    (or (float? expr) (integer? expr))
+    (valid?-multipleOf schema expr)
+    (valid?-maximum schema expr)))
+
+;; Other types
 
 (defn- valid?-nil
   [schema expr]

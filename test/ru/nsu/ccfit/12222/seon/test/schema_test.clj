@@ -23,6 +23,33 @@
     (is (invalid?
           {:type "integer"}
           nil))
+    (is (valid?
+          {:type "integer" :multipleOf 2}
+          4))
+    (is (invalid?
+          {:type "integer" :multipleOf 3}
+          4))
+    (is (valid?
+          {:type "integer" :maximum 3}
+          2))
+    (is (valid?
+          {:type "integer" :maximum 3}
+          3))
+    (is (invalid?
+          {:type "integer" :maximum 3}
+          4))
+    (is (valid?
+          {:type "integer" :maximum 3 :exclusiveMaximum true}
+          2))
+    (is (invalid?
+          {:type "integer" :maximum 3 :exclusiveMaximum true}
+          3))
+    (is (invalid?
+          {:type "integer" :maximum 3 :exclusiveMaximum true}
+          4))
+    (is (valid?
+          {:type "integer" :maximum 3 :exclusiveMaximum false}
+          3))
     ))
 
 (deftest valid?-number-test
@@ -39,6 +66,33 @@
     (is (invalid?
           {:type "number"}
           nil))
+    (is (valid?
+          {:type "number" :multipleOf 2.5}
+          5))
+    (is (invalid?
+          {:type "number" :multipleOf 3.5}
+          5))
+    (is (valid?
+          {:type "number" :maximum 3.0}
+          2))
+    (is (valid?
+          {:type "number" :maximum 3.0}
+          3))
+    (is (invalid?
+          {:type "number" :maximum 3.0}
+          4))
+    (is (valid?
+          {:type "number" :maximum 3.0 :exclusiveMaximum true}
+          2.0))
+    (is (invalid?
+          {:type "number" :maximum 3.0 :exclusiveMaximum true}
+          3.0))
+    (is (invalid?
+          {:type "number" :maximum 3.0 :exclusiveMaximum true}
+          4.0))
+    (is (valid?
+          {:type "number" :maximum 3.0 :exclusiveMaximum false}
+          3.0))
     ))
 
 (deftest valid?-string-test
