@@ -106,6 +106,18 @@
     (is (invalid?
           {:type "string"}
           nil))
+    (is (valid?
+          {:type "string" :minLength 2}
+          "ab"))
+    (is (invalid?
+          {:type "string" :minLength 2}
+          "a"))
+    (is (valid?
+          {:type "string" :maxLength 2}
+          "ab"))
+    (is (invalid?
+          {:type "string" :maxLength 2}
+          "abc"))
     ))
 
 (deftest valid?-nil-test
@@ -152,9 +164,11 @@
                                           }}
             {}))
       (is (not (valid?
-                 {:type "object" :properties {
-                                               :nested {:type "object" :required true}
-                                               }}
+                 {:type       "object"
+                  :properties {
+                                :nested {:type "object"}
+                                }
+                  :required   [:nested]}
                  {})))
       (is (valid?
             {:type "object" :properties {
@@ -162,14 +176,18 @@
                                           }}
             {:nested {}}))
       (is (valid?
-            {:type "object" :properties {
-                                          :nested {:type "object" :required true}
-                                          }}
+            {:type       "object"
+             :properties {
+                           :nested {:type "object"}
+                           }
+             :required   [:nested]}
             {:nested {}}))
       (is (invalid?
-            {:type "object" :properties {
-                                          :nested {:type "object" :required true}
-                                          }}
+            {:type       "object"
+             :properties {
+                           :nested {:type "object"}
+                           }
+             :required   [:nested]}
             {:nested 0}))
       )
     ))

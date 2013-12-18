@@ -58,6 +58,25 @@
     (valid?-multipleOf schema expr)
     (valid?-maximum schema expr)))
 
+
+;; String validation
+
+(defn- valid?-length
+  [schema expr]
+  (and
+    (if (:minLength schema)
+      (>= (count expr) (:minLength schema)) true)
+    (if (:maxLength schema)
+      (<= (count expr) (:maxLength schema)) true)
+    ))
+
+(defmethod valid?-type "string"
+           [schema expr]
+  (and
+    (string? expr)
+    (valid?-length schema expr)))
+
+
 ;; Other types
 
 (defn- valid?-nil
@@ -72,10 +91,6 @@
            [schema expr]
   (valid?-nil schema expr))
 
-(defmethod valid?-type "string"
-           [schema expr]
-  (string? expr))
-
 (defmethod valid?-type "boolean"
            [schema expr]
   (or (true? expr) (false? expr)))
@@ -85,11 +100,16 @@
   (and
     (map? expr)
     (if (:properties schema)
-      (every? true? (map (fn [[property schema]]
-                           (if (or (:required schema) (property expr))
-                             (valid?-type schema (property expr))
-                             true)
-                           ) (:properties schema)))
+      (and
+        (if (:required schema)
+          (every? (fn [property] (not (nil? (property expr)))) (:required schema))
+          true)
+        (every? true? (map (fn [[property schema]]
+                             (if (property expr)
+                               (valid?-type schema (property expr))
+                               true)
+                             ) (:properties schema)))
+        )
       true)))
 
 (defmethod valid?-type "array"
