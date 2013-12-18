@@ -152,6 +152,17 @@
           0))
     ))
 
+(deftest getAddProperties-test
+  (is (= #{:b :d}
+         (getAddProperties
+           {:properties {:a {} :c {}}}
+           {:a "a" :b "b" :c "c" :d "d"})))
+  (is (= #{:a :b :c :d}
+         (getAddProperties
+           {}
+           {:a "a" :b "b" :c "c" :d "d"})))
+  )
+
 (deftest valid?-object-test
   (testing "Object type validation."
     (testing "Object validation."
@@ -159,36 +170,46 @@
             {:type "object"}
             {}))
       (is (valid?
-            {:type "object" :properties {
-                                          :nested {:type "object"}
-                                          }}
+            {:type       "object"
+             :properties {:nested {:type "object"}}}
             {}))
       (is (not (valid?
                  {:type       "object"
-                  :properties {
-                                :nested {:type "object"}
-                                }
+                  :properties {:nested {:type "object"}}
                   :required   [:nested]}
                  {})))
       (is (valid?
-            {:type "object" :properties {
-                                          :nested {:type "object"}
-                                          }}
+            {:type       "object"
+             :properties {:nested {:type "object"}}}
             {:nested {}}))
       (is (valid?
             {:type       "object"
-             :properties {
-                           :nested {:type "object"}
-                           }
+             :properties {:nested {:type "object"}}
              :required   [:nested]}
             {:nested {}}))
       (is (invalid?
             {:type       "object"
-             :properties {
-                           :nested {:type "object"}
-                           }
+             :properties {:nested {:type "object"}}
              :required   [:nested]}
             {:nested 0}))
+      (is (valid?
+            {:type "object"
+             :properties {:a {:type "string"}}
+             :additionalProperties {:type "integer"}}
+            {:a "string" :b 1}))
+      (is (valid?
+            {:type "object"
+             :additionalProperties {:type "integer"}}
+            {:a 1 :b 2}))
+      (is (invalid?
+            {:type "object"
+             :properties {:a {:type "string"}}
+             :additionalProperties {:type "integer"}}
+            {:a "string" :b "1"}))
+      (is (invalid?
+            {:type "object"
+             :additionalProperties {:type "integer"}}
+            {:a "1" :b 2}))
       )
     ))
 

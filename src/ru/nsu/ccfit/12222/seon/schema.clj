@@ -1,5 +1,6 @@
 (ns ru.nsu.ccfit.12222.seon.schema
-  (:use [ru.nsu.ccfit.12222.seon.core]))
+  (:use [ru.nsu.ccfit.12222.seon.core])
+  (:use [clojure.data]))
 
 ;; General valiadtion functions
 
@@ -95,22 +96,43 @@
            [schema expr]
   (or (true? expr) (false? expr)))
 
+
+;; Object validation
+
+
+(defn getAddProperties
+  "List additional properties, i.e. properties, which exist in expr, but have no specific schema defined."
+  [schema expr]
+  (let [declaredProperties (set (keys (:properties schema)))
+        existingProperties (set (keys expr))
+        additionalProperties (first (diff existingProperties declaredProperties))]
+    additionalProperties))
+
 (defmethod valid?-type "object"
   [schema expr]
   (and
     (map? expr)
+    ; required properties
+    (if (:required schema)
+      (every? (fn [property] (not (nil? (property expr)))) (:required schema))
+      true)
+
+    ; properties
     (if (:properties schema)
-      (and
-        (if (:required schema)
-          (every? (fn [property] (not (nil? (property expr)))) (:required schema))
-          true)
-        (every? true? (map (fn [[property schema]]
-                             (if (property expr)
-                               (valid?-type schema (property expr))
-                               true)
-                             ) (:properties schema)))
-        )
-      true)))
+      (every? (fn [[property schema]]
+                (if (property expr)
+                  (valid? schema (property expr))
+                  true)
+                ) (:properties schema))
+      true)
+
+    ; additional properties
+    (if (:additionalProperties schema)
+      (every?
+        (fn [property] (valid? (:additionalProperties schema) (property expr)))
+        (getAddProperties schema expr))
+      true)
+    ))
 
 (defmethod valid?-type "array"
            [schema expr]
