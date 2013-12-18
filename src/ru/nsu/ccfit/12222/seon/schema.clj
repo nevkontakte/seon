@@ -4,15 +4,57 @@
 
 ;; General valiadtion functions
 
+(declare valid?)
+
 (defmulti valid?-type
           "Validate SEON expression against schema."
           (fn [schema expr]
             (:type schema)))
 
+(defn valid?-enum
+  "Verify that expr is one of enumerated values."
+  [schema expr]
+  (if (:enum schema)
+    (contains? (set (:enum schema)) expr)
+    true))
+
+(defn valid?-allOf
+  "Verify that expr valid against all of schemes."
+  [schema expr]
+  (if (:allOf schema)
+    (every? (fn [subSchema] (valid? subSchema expr)) (:allOf schema))
+    true))
+
+(defn valid?-anyOf
+  "Verify that expr valid against all of schemes."
+  [schema expr]
+  (if (:anyOf schema)
+    (some (fn [subSchema] (valid? subSchema expr)) (:anyOf schema))
+    true))
+
+(defn valid?-oneOf
+  "Verify that expr valid against all of schemes."
+  [schema expr]
+  (if (:oneOf schema)
+    (= 1 (count (filter (fn [subSchema] (valid? subSchema expr)) (:oneOf schema))))
+    true))
+
+(defn valid?-not
+  "Verify that expr is not valid against schema."
+  [schema expr]
+  (if (:not schema)
+    (not (valid? (:not schema) expr))
+    true))
+
 (defn valid?
   "Validate SEON expression common for all types."
   [schema expr]
   (and
+    (valid?-enum schema expr)
+    (valid?-allOf schema expr)
+    (valid?-anyOf schema expr)
+    (valid?-oneOf schema expr)
+    (valid?-not schema expr)
     (if (:type schema) (valid?-type schema expr) true))
   )
 
@@ -23,7 +65,7 @@
 
 
 (defmethod valid?-type :default
-  [schema expr]
+           [schema expr]
   (throw (Exception. (str "Unknown schema type: " (serialize schema)))))
 
 
@@ -32,7 +74,7 @@
 (defn- valid?-multipleOf
   [schema expr]
   (if (:multipleOf schema)
-    (= (float (mod expr (:multipleOf schema)))  0.0)
+    (= (float (mod expr (:multipleOf schema))) 0.0)
     true))
 
 (defn- valid?-maximum
@@ -43,17 +85,17 @@
     (if (:maximum schema)
       (pred expr (:maximum schema))
       true))
-    )
+  )
 
 (defmethod valid?-type "integer"
-  [schema expr]
+           [schema expr]
   (and
     (integer? expr)
     (valid?-multipleOf schema expr)
     (valid?-maximum schema expr)))
 
 (defmethod valid?-type "number"
-  [schema expr]
+           [schema expr]
   (and
     (or (float? expr) (integer? expr))
     (valid?-multipleOf schema expr)
@@ -109,7 +151,7 @@
     additionalProperties))
 
 (defmethod valid?-type "object"
-  [schema expr]
+           [schema expr]
   (and
     (map? expr)
     ; required properties

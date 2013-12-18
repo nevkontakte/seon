@@ -10,6 +10,126 @@
           Exception #"^Unknown schema type"
           (valid? {:type "unknown-type"} {})))
     )
+  (testing "Typeless schemes."
+    (is (valid? {} 0))
+    (is (valid? {} 0.1))
+    (is (valid? {} "abc"))
+    (is (valid? {} nil))
+    (is (valid? {} `(1 2 3)))
+    (is (valid? {} {:a :b, :c :d}))
+    )
+  (testing "Enum property."
+    (is (valid?
+          {:enum `(1 2 3)}
+          1))
+    (is (valid?
+          {:enum `(1 2 3)}
+          2))
+    (is (invalid?
+          {:enum `(1 2 3)}
+          4))
+    (is (invalid?
+          {:enum `((1) 2 3)}
+          1))
+    (is (valid?
+          {:enum `((1) 2 3)}
+          `(1)))
+    (is (invalid?
+          {:enum `()}
+          1))
+    )
+  (testing "AllOf property."
+    (is (valid?
+          `{:allOf (
+                     {:enum (1 2 "one" "two")}
+                     {:type "integer"}
+                     )}
+          1))
+    (is (valid?
+          `{:allOf (
+                     {:enum (1 2 "one" "two")}
+                     {:type "integer"}
+                     )}
+          2))
+    (is (invalid?
+          `{:allOf (
+                     {:enum (1 2 "one" "two")}
+                     {:type "integer"}
+                     )}
+          3))
+    (is (invalid?
+          `{:allOf (
+                     {:enum (1 2 "one" "two")}
+                     {:type "integer"}
+                     )}
+          "one"))
+    )
+  (testing "AnyOf property."
+    (is (valid?
+          `{:anyOf (
+                     {:type "integer"}
+                     {:enum (1 2 3 "abc")}
+                     )}
+          1))
+    (is (valid?
+          `{:anyOf (
+                     {:type "integer"}
+                     {:enum (1 2 3 "abc")}
+                     )}
+          4))
+    (is (valid?
+          `{:anyOf (
+                     {:type "integer"}
+                     {:enum (1 2 3 "abc")}
+                     )}
+          "abc"))
+    (is (invalid?
+          `{:anyOf (
+                     {:type "integer"}
+                     {:enum (1 2 3 "abc")}
+                     )}
+          "bcd"))
+    )
+  (testing "OneOf property."
+    (is (valid?
+          `{:oneOf (
+                     {:type "string"}
+                     {:type "integer"}
+                     )}
+          1))
+    (is (valid?
+          `{:oneOf (
+                     {:type "string"}
+                     {:type "integer"}
+                     )}
+          "abc"))
+    (is (invalid?
+          `{:oneOf (
+                     {:type "string"}
+                     {:type "integer"}
+                     )}
+          true))
+    (is (invalid?
+          `{:oneOf (
+                     {:type "integer"}
+                     {:enum (1 2 3 "abc")}
+                     )}
+          1))
+    (is (valid?
+          `{:oneOf (
+                     {:type "integer"}
+                     {:enum (1 2 3 "abc")}
+                     )}
+          "abc"))
+    )
+  (testing "Not property."
+    (is (valid?
+          {:not {:type "integer"}}
+          "abc"))
+    (is (invalid?
+          {:not {:type "integer"}}
+          1))
+    )
   )
 
 (deftest valid?-integer-test
