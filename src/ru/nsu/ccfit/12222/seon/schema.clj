@@ -63,19 +63,19 @@
 ;; String validation
 
 (defn- valid?-length
-  [schema expr]
+  [minKeyword maxKeyword schema expr]
   (and
-    (if (:minLength schema)
-      (>= (count expr) (:minLength schema)) true)
-    (if (:maxLength schema)
-      (<= (count expr) (:maxLength schema)) true)
+    (if (minKeyword schema)
+      (>= (count expr) (minKeyword schema)) true)
+    (if (maxKeyword schema)
+      (<= (count expr) (maxKeyword schema)) true)
     ))
 
 (defmethod valid?-type "string"
            [schema expr]
   (and
     (string? expr)
-    (valid?-length schema expr)))
+    (valid?-length :minLength :maxLength schema expr)))
 
 
 ;; Other types
@@ -134,10 +134,17 @@
       true)
     ))
 
+
+(defn- valid?-unique
+  [schema expr]
+  (if (:uniqueItems schema) (apply distinct? expr) true))
+
 (defmethod valid?-type "array"
            [schema expr]
   (and
     (seq? expr)
+    (valid?-length :minItems :maxItems schema expr)
+    (valid?-unique schema expr)
     (if (:items schema)
       (every? true? (map (partial valid?-type (:items schema)) expr))
       true)))

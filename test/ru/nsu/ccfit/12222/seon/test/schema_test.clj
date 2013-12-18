@@ -233,4 +233,38 @@
     (is (invalid?
           {:type "array" :items {:type "integer"}}
           `(1 2.0 3)))
+    )
+  (testing "Array length validation."
+    (is (invalid?
+          {:type "array" :minItems 2}
+          `(1)))
+    (is (valid?
+          {:type "array" :minItems 2}
+          `(1 2)))
+    (is (valid?
+          {:type "array" :minItems 2}
+          `(1 2 3)))
+    (is (valid?
+          {:type "array" :maxItems 2}
+          `(1)))
+    (is (valid?
+          {:type "array" :maxItems 2}
+          `(1 2)))
+    (is (invalid?
+          {:type "array" :maxItems 2}
+          `(1 2 3)))
+    )
+  (testing "Array unique items."
+    (is (valid?
+          {:type "array"}
+          `(1 2 3 1 2 3)))
+    (is (valid?
+          {:type "array" :uniqueItems false}
+          `(1 2 3 1 2 3)))
+    (is (invalid?
+          {:type "array" :uniqueItems true}
+          `(1 2 3 1 2 3)))
+    (is (valid?
+          {:type "array" :uniqueItems true}
+          `(1 2 3 4 5 6)))
     ))
