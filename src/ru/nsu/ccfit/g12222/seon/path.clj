@@ -1,5 +1,5 @@
-(ns ru.nsu.ccfit.12222.seon.path
-  (:use [ru.nsu.ccfit.12222.seon.core]))
+(ns ru.nsu.ccfit.g12222.seon.path
+  (:use [ru.nsu.ccfit.g12222.seon.core]))
 
 (defn function
   [expr mas]
@@ -18,6 +18,7 @@
                                         (function subExp mas))
                                       (vals expr)))
                   )
+
 
 
                 :else

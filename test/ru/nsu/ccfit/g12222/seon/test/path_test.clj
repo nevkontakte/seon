@@ -1,7 +1,7 @@
-(ns ru.nsu.ccfit.12222.seon.test.path-test
-  (:use [ru.nsu.ccfit.12222.seon.core])
-  (:use [ru.nsu.ccfit.12222.seon.path])
-  (:use [ru.nsu.ccfit.12222.seon.schema])
+(ns ru.nsu.ccfit.g12222.seon.test.path-test
+  (:use [ru.nsu.ccfit.g12222.seon.core])
+  (:use [ru.nsu.ccfit.g12222.seon.path])
+  (:use [ru.nsu.ccfit.g12222.seon.schema])
   (:use [clojure.test]))
 
 (deftest parser-test
