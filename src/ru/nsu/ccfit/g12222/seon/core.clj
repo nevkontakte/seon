@@ -1,4 +1,4 @@
-(ns ru.nsu.ccfit.12222.seon.core)
+(ns ru.nsu.ccfit.g12222.seon.core)
 
 (declare seon?)
 

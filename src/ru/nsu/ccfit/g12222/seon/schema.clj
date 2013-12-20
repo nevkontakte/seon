@@ -1,5 +1,5 @@
-(ns ru.nsu.ccfit.12222.seon.schema
-  (:use [ru.nsu.ccfit.12222.seon.core])
+(ns ru.nsu.ccfit.g12222.seon.schema
+  (:use [ru.nsu.ccfit.g12222.seon.core])
   (:use [clojure.data]))
 
 ;; General valiadtion functions

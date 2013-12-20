@@ -1,6 +1,6 @@
-(ns ru.nsu.ccfit.12222.seon.test.core_test
+(ns ru.nsu.ccfit.g12222.seon.test.core_test
   (:require [clojure.test :refer :all]
-            [ru.nsu.ccfit.12222.seon.core :refer :all]))
+            [ru.nsu.ccfit.g12222.seon.core :refer :all]))
 
 (deftest seon-atom-test
   (testing "SEON atom validation predicate."
