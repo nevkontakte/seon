@@ -5,26 +5,25 @@
   [expr mas]
   (if (nil? mas)
     (list expr)
-    (if (seon-map? expr)
-      (if (= "*" (first mas)) ; (first mas) == "*"
-        (map
-          (fn [subExp] (function subExp (next mas)))
-          (vals expr))
-                              ; (first mas) != *
-        (if (= ".." (first mas))
-          (concat
-            (function expr (next mas))
-            (reduce concat (map (fn [subExp]
-                                  (function subExp mas))
-                                (vals expr)))
-            )
-          (function ((keyword (first mas)) expr) (next mas)))
-        )
+    (cond (seon-map? expr)
+          (cond (= "*" (first mas))
+                (map
+                  (fn [subExp] (function subExp (next mas)))
+                  (vals expr))
 
-      ;else
-      (list expr)
+                (= ".." (first mas))
+                (concat
+                  (function expr (next mas))
+                  (reduce concat (map (fn [subExp]
+                                        (function subExp mas))
+                                      (vals expr)))
+                  )
 
-      ))
+
+                :else
+                (function ((keyword (first mas)) expr) (next mas)))
+          :else (list expr)
+          ))
 
   )
 
@@ -32,7 +31,7 @@
 (defn parser
   [expr string]
   {:pre [(seon? expr)]}
-  (function expr (re-seq #"[\w+]|[/.]{2}" string))
+  (function expr (re-seq #"\w+|[.]{2}|(?<=\[)[0-9]+(?=\])" string))
 
   )
 
