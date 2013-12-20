@@ -1,4 +1,4 @@
-# ru.nsu.ccfit.12222.seon
+# ru.nsu.ccfit.g12222.seon
 
 A Clojure library designed to ... well, that part is up to you.
 
