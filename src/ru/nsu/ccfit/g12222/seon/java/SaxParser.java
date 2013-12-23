@@ -20,6 +20,7 @@ public class SaxParser {
         macros['{'] = new EdnReader.MapReader();
         macros['}'] = new EdnReader.UnmatchedDelimiterReader();
         macros['\\'] = new EdnReader.CharacterReader();
+        macros[':'] = new ParseKeyword();
     }
 
     /**
@@ -113,17 +114,12 @@ public class SaxParser {
             if (Character.isDigit(ch2)) {
                 ReaderUtils.unread(r, ch2);
                 Object n = ParseNumber.readNumber(r, (char) ch);
-                if (RT.suppressRead())
-                    return null;
                 return n;
             }
             ReaderUtils.unread(r, ch2);
         }
 
-        String token = ParseKeyword.readToken(r, (char) ch);
-        if (RT.suppressRead())
-            return null;
-        return ParseKeyword.interpretToken(token);
+        return ParseKeyword.interpretToken(ParseKeyword.readToken(r, (char) ch));
     }
 
     static IFn getMacro(int ch) {
