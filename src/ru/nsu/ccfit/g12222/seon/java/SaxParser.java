@@ -17,8 +17,6 @@ public class SaxParser extends AbstractParser {
 
     public static final char STRING = '"';
 
-    public static final char COMMENT = ';';
-
     public static final char LIST1 = '(';
 
     public static final char LIST2 = ')';
@@ -39,7 +37,6 @@ public class SaxParser extends AbstractParser {
 
     static {
         macros[STRING] = new ParseEdnAtom(new EdnReader.StringReader());
-//        macros[COMMENT] = new LispReader.CommentReader();
 //        macros[LIST1] = new LispReader.ListReader();
         macros[LIST2] = new ParseEdnAtom(new EdnReader.UnmatchedDelimiterReader());
 //        macros[MAP1] = new LispReader.MapReader();
