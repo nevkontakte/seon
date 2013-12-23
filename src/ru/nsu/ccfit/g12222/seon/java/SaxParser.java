@@ -1,6 +1,7 @@
 package ru.nsu.ccfit.g12222.seon.java;
 
 
+import clojure.lang.EdnReader;
 import clojure.lang.IFn;
 import clojure.lang.Util;
 
@@ -37,13 +38,13 @@ public class SaxParser extends AbstractParser {
     public static final char DIGIT = '0';
 
     static {
-        macros[STRING] = new ParseString();
+        macros[STRING] = new ParseEdnAtom(new EdnReader.StringReader());
 //        macros[COMMENT] = new LispReader.CommentReader();
 //        macros[LIST1] = new LispReader.ListReader();
-//        macros[LIST2] = new LispReader.UnmatchedDelimiterReader();
+        macros[LIST2] = new ParseEdnAtom(new EdnReader.UnmatchedDelimiterReader());
 //        macros[MAP1] = new LispReader.MapReader();
-//        macros[MAP2] = new LispReader.UnmatchedDelimiterReader();
-//        macros[CHAR] = new LispReader.CharacterReader();
+        macros[LIST2] = new ParseEdnAtom(new EdnReader.UnmatchedDelimiterReader());
+        macros[CHAR] = new ParseEdnAtom(new EdnReader.CharacterReader());
         macros[KEYWORD] = new ParseKeyword();
         macros[NUMBER_PLUS] = macros[NUMBER_MINUS] = macros[DIGIT] = new ParseNumber();
     }
