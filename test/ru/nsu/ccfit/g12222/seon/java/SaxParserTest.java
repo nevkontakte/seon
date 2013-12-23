@@ -5,7 +5,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class SaxParserTest {
     @Before
@@ -13,8 +13,8 @@ public class SaxParserTest {
         IPersistentMap handlers = PersistentHashMap.create();
         handlers = handlers.assoc(AbstractParser.ATOM, new AFn() {
             @Override
-            public Object invoke(Object arg1, Object arg2) {
-                return new Pair(arg2.getClass(), arg2);
+            public Object invoke(Object state, Object value) {
+                return new Pair((value == null) ? null : value.getClass(), value);
             }
         });
         Var.pushThreadBindings(handlers);
@@ -34,24 +34,32 @@ public class SaxParserTest {
         assertEquals(new Pair(Double.class, 1.0), SaxParser.read("+1.0"));
         assertEquals(new Pair(Double.class, -1.0), SaxParser.read("-1.0"));
     }
-//
-//    @Test
-//    public void testReadNil() throws Exception {
-//        assertNull(SaxParser.read("nil"));
-//    }
-//
-//    @Test
-//    public void testReadBool() throws Exception {
-//        assertTrue((Boolean) SaxParser.read("true"));
-//        assertFalse((Boolean) SaxParser.read("false"));
-//    }
-//
-//    @Test
-//    public void testReadKeyword() throws Exception {
-//        assertEquals(Keyword.intern("testkwd"), SaxParser.read(":testkwd"));
-//        assertEquals("testkwd", ((Keyword) SaxParser.read(":testkwd")).getName());
-//    }
-//
+
+    @Test
+    public void testReadNil() throws Exception {
+        assertEquals(new Pair(null, null), SaxParser.read("nil"));
+    }
+
+    @Test
+    public void testReadBool() throws Exception {
+        assertEquals(new Pair(Boolean.class, true), SaxParser.read("true"));
+        assertEquals(new Pair(Boolean.class, false), SaxParser.read("false"));
+    }
+
+    @Test
+    public void testReadKeyword() throws Exception {
+        assertEquals(new Pair(Keyword.class, Keyword.intern("testkwd")), SaxParser.read(":testkwd"));
+        assertEquals("testkwd", ((Keyword) ((Pair) SaxParser.read(":testkwd")).b).getName());
+    }
+
+    @Test
+    public void testSymbol() throws Exception {
+        assertEquals(new Pair(Symbol.class, Symbol.intern("+")), SaxParser.read("+"));
+        assertEquals(new Pair(Symbol.class, Symbol.intern("abc")), SaxParser.read("abc"));
+        assertEquals(new Pair(Symbol.class, Symbol.intern("testkwd")), SaxParser.read("testkwd"));
+    }
+
+    //
 //    @Test
 //    public void testReadString() throws Exception {
 //        assertEquals("", SaxParser.read("\"\""));

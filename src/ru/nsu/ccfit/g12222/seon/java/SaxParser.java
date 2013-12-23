@@ -44,7 +44,7 @@ public class SaxParser extends AbstractParser {
 //        macros[MAP1] = new LispReader.MapReader();
 //        macros[MAP2] = new LispReader.UnmatchedDelimiterReader();
 //        macros[CHAR] = new LispReader.CharacterReader();
-//        macros[KEYWORD] = new ParseKeyword();
+        macros[KEYWORD] = new ParseKeyword();
         macros[NUMBER_PLUS] = macros[NUMBER_MINUS] = macros[DIGIT] = new ParseNumber();
     }
 
@@ -77,7 +77,7 @@ public class SaxParser extends AbstractParser {
             }
         }
 
-        return ParseKeyword.interpretToken(ParseKeyword.readToken(r, (char) ch));
+        return getMacro(KEYWORD).invoke(state, r, (char) ch);
     }
 
     static IFn getMacro(int ch) {
