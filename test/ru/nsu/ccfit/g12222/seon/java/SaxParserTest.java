@@ -1,9 +1,6 @@
 package ru.nsu.ccfit.g12222.seon.java;
 
-import clojure.lang.AFn;
-import clojure.lang.IPersistentMap;
-import clojure.lang.PersistentHashMap;
-import clojure.lang.Var;
+import clojure.lang.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,7 +14,7 @@ public class SaxParserTest {
         handlers = handlers.assoc(AbstractParser.ATOM, new AFn() {
             @Override
             public Object invoke(Object arg1, Object arg2) {
-                return arg2;
+                return new Pair(arg2.getClass(), arg2);
             }
         });
         Var.pushThreadBindings(handlers);
@@ -30,12 +27,12 @@ public class SaxParserTest {
 
     @Test
     public void testReadNumber() throws Exception {
-        assertEquals(1l, SaxParser.read("1"));
-        assertEquals(1l, SaxParser.read("+1"));
-        assertEquals(-1l, SaxParser.read("-1"));
-        assertEquals(1.0, SaxParser.read("1.0"));
-        assertEquals(1.0, SaxParser.read("+1.0"));
-        assertEquals(-1.0, SaxParser.read("-1.0"));
+        assertEquals(new Pair(Long.class, 1l), SaxParser.read("1"));
+        assertEquals(new Pair(Long.class, 1l), SaxParser.read("+1"));
+        assertEquals(new Pair(Long.class, -1l), SaxParser.read("-1"));
+        assertEquals(new Pair(Double.class, 1.0), SaxParser.read("1.0"));
+        assertEquals(new Pair(Double.class, 1.0), SaxParser.read("+1.0"));
+        assertEquals(new Pair(Double.class, -1.0), SaxParser.read("-1.0"));
     }
 //
 //    @Test
@@ -65,4 +62,39 @@ public class SaxParserTest {
 //        assertEquals("a\u00FFbc", SaxParser.read("\"a\\u00FFbc\""));
 //
 //    }
+
+    private static class Pair{
+        public final Object a,b;
+
+        private Pair(Object a, Object b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            Pair pair = (Pair) o;
+
+            return !(a != null ? !a.equals(pair.a) : pair.a != null) && !(b != null ? !b.equals(pair.b) : pair.b != null);
+
+        }
+
+        @Override
+        public int hashCode() {
+            int result = a != null ? a.hashCode() : 0;
+            result = 31 * result + (b != null ? b.hashCode() : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Pair{" +
+                    "a=" + a +
+                    ", b=" + b +
+                    '}';
+        }
+    }
 }

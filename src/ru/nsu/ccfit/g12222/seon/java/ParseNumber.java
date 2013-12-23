@@ -88,7 +88,14 @@ public class ParseNumber extends AbstractParser {
 
     @Override
     public Object invoke(Object state, PushbackReader r, char initch) {
-        Object number = readNumber(r, initch);
-        return getHandler(ATOM).invoke(state, number);
+        if (initch == '+' || initch == '-') {
+            int ch2 = ReaderUtils.read1(r);
+            ReaderUtils.unread(r, ch2);
+            if (!Character.isDigit(ch2)) {
+                return r;
+            }
+        }
+
+        return getHandler(ATOM).invoke(state, readNumber(r, initch));
     }
 }

@@ -69,17 +69,12 @@ public class SaxParser extends AbstractParser {
 
         IFn macroFn = getMacro(ch);
         if (macroFn != null) {
-            return macroFn.invoke(state, r, (char) ch);
-        }
+            Object result = macroFn.invoke(state, r, (char) ch);
 
-        if (ch == '+' || ch == '-') {
-            int ch2 = ReaderUtils.read1(r);
-            if (Character.isDigit(ch2)) {
-                ReaderUtils.unread(r, ch2);
-                Object n = ParseNumber.readNumber(r, (char) ch);
-                return n;
+            // If parser returns the same PushBackReader, that means we must pass to symbol parser.
+            if(result != r) {
+                return result;
             }
-            ReaderUtils.unread(r, ch2);
         }
 
         return ParseKeyword.interpretToken(ParseKeyword.readToken(r, (char) ch));
