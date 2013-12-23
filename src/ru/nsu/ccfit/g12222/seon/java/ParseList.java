@@ -11,6 +11,10 @@ public class ParseList extends AbstractParser {
         for(;;) {
             int ch = ReaderUtils.read1(r);
 
+            while (CharUtils.isWhitespace(ch)) {
+                ch = ReaderUtils.read1(r);
+            }
+
             if (ch == -1) {
                 throw Util.runtimeException("EOF while reading");
             }

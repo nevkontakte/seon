@@ -62,6 +62,11 @@ public class ParseListTest {
         );
 
         assertArrayEquals(
+                new Object[]{'(', ')'},
+               ((List) SaxParser.read(new LinkedList(), "( )")).toArray()
+        );
+
+        assertArrayEquals(
                 new Object[]{'(', 1l, null, "abc", ')'},
                ((List) SaxParser.read(new LinkedList(), "(1 nil \"abc\")")).toArray()
         );
@@ -69,6 +74,11 @@ public class ParseListTest {
         assertArrayEquals(
                 new Object[]{'(', 1l, '(', null, ')', 2.0, ')'},
                ((List) SaxParser.read(new LinkedList(), "(1 (nil) 2.0)")).toArray()
+        );
+
+        assertArrayEquals(
+                new Object[]{'(', 1l, '(', null, ')', 2.0, ')'},
+               ((List) SaxParser.read(new LinkedList(), "(1 (nil) 2.0 )")).toArray()
         );
     }
 }
