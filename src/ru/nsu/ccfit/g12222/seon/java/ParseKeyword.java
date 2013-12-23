@@ -67,7 +67,7 @@ public class ParseKeyword extends AbstractParser {
     }
 
     static boolean isTerminatingMacro(int ch) {
-        return (ch != '#' && ch != '\'' && (SaxParser.getMacro(ch) != null));
+        return (ch != '#' && ch != '\'' && (SaxParser.getMacro(ch) != null) && !(SaxParser.getMacro(ch) instanceof ParseNumber));
     }
 
     @Override

@@ -39,8 +39,8 @@ public class SaxParser extends AbstractParser {
         macros[STRING] = new ParseEdnAtom(new EdnReader.StringReader());
         macros[LIST1] = new ParseList();
         macros[LIST2] = new ParseEdnAtom(new EdnReader.UnmatchedDelimiterReader());
-//        macros[MAP1] = new LispReader.MapReader();
-        macros[LIST2] = new ParseEdnAtom(new EdnReader.UnmatchedDelimiterReader());
+        macros[MAP1] = new ParseMap();
+        macros[MAP2] = new ParseEdnAtom(new EdnReader.UnmatchedDelimiterReader());
         macros[CHAR] = new ParseEdnAtom(new EdnReader.CharacterReader());
         macros[KEYWORD] = new ParseKeyword();
         macros[NUMBER_PLUS] = macros[NUMBER_MINUS] = macros[DIGIT] = new ParseNumber();

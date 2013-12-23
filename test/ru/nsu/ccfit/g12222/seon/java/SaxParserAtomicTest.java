@@ -49,14 +49,17 @@ public class SaxParserAtomicTest {
     @Test
     public void testReadKeyword() throws Exception {
         assertEquals(new Pair(Keyword.class, Keyword.intern("testkwd")), SaxParser.read(":testkwd"));
+        assertEquals(new Pair(Keyword.class, Keyword.intern("testkwd2")), SaxParser.read(":testkwd2"));
         assertEquals("testkwd", ((Keyword) ((Pair) SaxParser.read(":testkwd")).b).getName());
     }
 
     @Test
     public void testSymbol() throws Exception {
         assertEquals(new Pair(Symbol.class, Symbol.intern("+")), SaxParser.read("+"));
+        assertEquals(new Pair(Symbol.class, Symbol.intern("+one?")), SaxParser.read("+one?"));
         assertEquals(new Pair(Symbol.class, Symbol.intern("abc")), SaxParser.read("abc"));
         assertEquals(new Pair(Symbol.class, Symbol.intern("testkwd")), SaxParser.read("testkwd"));
+        assertEquals(new Pair(Symbol.class, Symbol.intern("testkwd2")), SaxParser.read("testkwd2"));
     }
 
 
