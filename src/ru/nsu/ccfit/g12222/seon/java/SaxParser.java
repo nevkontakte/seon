@@ -75,6 +75,10 @@ public class SaxParser {
      */
     protected final IFn atom;
 
+    public SaxParser() {
+        this(null, null, null, null, null, null);
+    }
+
     public SaxParser(IFn listOpen, IFn listClose, IFn mapOpen, IFn mapKey, IFn mapClose, IFn atom) {
         this.listOpen = listOpen == null ? noop : listOpen;
         this.listClose = listClose == null ? noop : listClose;
