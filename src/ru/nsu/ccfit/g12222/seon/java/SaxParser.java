@@ -10,7 +10,9 @@ import java.io.StringReader;
  * Parse SEON expression in SAX manner.
  */
 public class SaxParser {
-    static IFn[] macros = new IFn[256];
+    protected final static Noop noop = new Noop();
+
+    static final IFn[] macros = new IFn[256];
 
     static {
         macros['"'] = new EdnReader.StringReader();
@@ -23,9 +25,12 @@ public class SaxParser {
         macros[':'] = new ParseKeyword();
     }
 
+
     /**
      * SAX parser event handlers.
      */
+
+    public static final Namespace SAX_NS = Namespace.findOrCreate(Symbol.intern("clojure.core"));
 
     /**
      * "List opened" event handler.
@@ -33,7 +38,7 @@ public class SaxParser {
      * Clojure function, accepting single parameter state and returning new state.
      * (fn [state] state)
      */
-    protected final IFn listOpen;
+    public static final Var LIST_OPEN = Var.intern(SAX_NS, Symbol.intern("*seon-list-open*"),  noop).setDynamic();
 
     /**
      * "List closed" event handler.
@@ -41,7 +46,7 @@ public class SaxParser {
      * Clojure function, accepting single parameter state and returning new state.
      * (fn [state] state)
      */
-    protected final IFn listClose;
+    public static final Var LIST_CLOSE = Var.intern(SAX_NS, Symbol.intern("*seon-list-close*"),  noop).setDynamic();
 
     /**
      * "Map opened" event handler.
@@ -49,7 +54,7 @@ public class SaxParser {
      * Clojure function, accepting single parameter state and returning new state.
      * (fn [state] state)
      */
-    protected final IFn mapOpen;
+    public static final Var MAP_OPEN = Var.intern(SAX_NS, Symbol.intern("*seon-map-open*"),  noop).setDynamic();
 
     /**
      * "Map closed" event handler.
@@ -57,7 +62,7 @@ public class SaxParser {
      * Clojure function, accepting single parameter state and returning new state.
      * (fn [state] state)
      */
-    protected final IFn mapClose;
+    public static final Var MAP_CLOSE = Var.intern(SAX_NS, Symbol.intern("*seon-map-close*"),  noop).setDynamic();
 
     /**
      * "Map key" event handler.
@@ -65,7 +70,7 @@ public class SaxParser {
      * Clojure function, accepting two parameters: state and met key name. Must return new state.
      * (fn [state keyName] state)
      */
-    protected final IFn mapKey;
+    public static final Var MAP_KEY = Var.intern(SAX_NS, Symbol.intern("*seon-map-key*"),  noop).setDynamic();
 
     /**
      * "Atomic value" event handler, e.g. string, number, integer, boolean, nil.
@@ -73,19 +78,11 @@ public class SaxParser {
      * Clojure function, accepting two parameters: state and value. Must return new state.
      * (fn [state value] state)
      */
-    protected final IFn atom;
+    public static final Var ATOM = Var.intern(SAX_NS, Symbol.intern("*seon-atom*"),  noop).setDynamic();
 
-    public SaxParser() {
-        this(null, null, null, null, null, null);
-    }
-
-    public SaxParser(IFn listOpen, IFn listClose, IFn mapOpen, IFn mapKey, IFn mapClose, IFn atom) {
-        this.listOpen = listOpen == null ? noop : listOpen;
-        this.listClose = listClose == null ? noop : listClose;
-        this.mapOpen = mapOpen == null ? noop : mapOpen;
-        this.mapKey = mapKey == null ? noop : mapKey;
-        this.mapClose = mapClose == null ? noop : mapClose;
-        this.atom = atom == null ? noop : atom;
+    protected IFn getHandler(Var name) {
+        Object handler = name.deref();
+        return (handler == null) ? noop : (IFn) handler;
     }
 
     public static Object read(String str) {
@@ -143,6 +140,5 @@ public class SaxParser {
         }
     }
 
-    protected final static Noop noop = new Noop();
 
 }
