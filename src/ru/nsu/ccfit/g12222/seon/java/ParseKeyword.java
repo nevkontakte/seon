@@ -1,12 +1,15 @@
 package ru.nsu.ccfit.g12222.seon.java;
 
-import clojure.lang.*;
+import clojure.lang.Keyword;
+import clojure.lang.RT;
+import clojure.lang.Symbol;
+import clojure.lang.Util;
 
 import java.io.PushbackReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ParseKeyword extends AFn {
+public class ParseKeyword extends AbstractParser {
     static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
 
     public static String readToken(PushbackReader r, char initch) {
@@ -68,11 +71,8 @@ public class ParseKeyword extends AFn {
     }
 
     @Override
-    public Object invoke(Object r, Object initch, Object __reserved__) {
-        return invoke((PushbackReader) r, (char) initch, __reserved__);
-    }
-
-    public Object invoke(PushbackReader r, char initch, Object __reserved__) {
-        return interpretToken(readToken(r, initch));
+    public Object invoke(Object state, PushbackReader r, char initch) {
+        Object keyword = interpretToken(readToken(r, initch));
+        return getHandler(ATOM).invoke(state, keyword);
     }
 }

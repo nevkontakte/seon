@@ -9,12 +9,10 @@ import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ru.nsu.ccfit.g12222.seon.java.SaxParser.getMacro;
-
 /**
  * Number parser utility class
  */
-public class ParseNumber {
+public class ParseNumber extends AbstractParser {
     static Pattern intPat =
             Pattern.compile(
                     "([-+]?)(?:(0)|([1-9][0-9]*)|0[xX]([0-9A-Fa-f]+)|0([0-7]+)|([1-9][0-9]?)[rR]([0-9A-Za-z]+)|0[0-9]+)(N)?");
@@ -27,7 +25,7 @@ public class ParseNumber {
 
         for (; ; ) {
             int ch = ReaderUtils.read1(r);
-            if (ch == -1 || CharUtils.isWhitespace(ch) || (getMacro(ch) != null)) {
+            if (ch == -1 || CharUtils.isWhitespace(ch)) {
                 ReaderUtils.unread(r, ch);
                 break;
             }
@@ -86,5 +84,11 @@ public class ParseNumber {
                     Numbers.reduceBigInt(BigInt.fromBigInteger(new BigInteger(m.group(2)))));
         }
         return null;
+    }
+
+    @Override
+    public Object invoke(Object state, PushbackReader r, char initch) {
+        Object number = readNumber(r, initch);
+        return getHandler(ATOM).invoke(state, number);
     }
 }

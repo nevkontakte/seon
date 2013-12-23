@@ -1,7 +1,8 @@
 package ru.nsu.ccfit.g12222.seon.java;
 
 
-import clojure.lang.*;
+import clojure.lang.IFn;
+import clojure.lang.Util;
 
 import java.io.PushbackReader;
 import java.io.StringReader;
@@ -9,87 +10,53 @@ import java.io.StringReader;
 /**
  * Parse SEON expression in SAX manner.
  */
-public class SaxParser {
-    protected final static Noop noop = new Noop();
+public class SaxParser extends AbstractParser {
 
-    static final IFn[] macros = new IFn[256];
+    static final AbstractParser[] macros = new AbstractParser[256];
+
+    public static final char STRING = '"';
+
+    public static final char COMMENT = ';';
+
+    public static final char LIST1 = '(';
+
+    public static final char LIST2 = ')';
+
+    public static final char MAP1 = '{';
+
+    public static final char MAP2 = '}';
+
+    public static final char CHAR = '\\';
+
+    public static final char KEYWORD = ':';
+
+    public static final char NUMBER_PLUS = '+';
+
+    public static final char NUMBER_MINUS = '-';
+
+    public static final char DIGIT = '0';
 
     static {
-        macros['"'] = new EdnReader.StringReader();
-        macros[';'] = new EdnReader.CommentReader();
-        macros['('] = new EdnReader.ListReader();
-        macros[')'] = new EdnReader.UnmatchedDelimiterReader();
-        macros['{'] = new EdnReader.MapReader();
-        macros['}'] = new EdnReader.UnmatchedDelimiterReader();
-        macros['\\'] = new EdnReader.CharacterReader();
-        macros[':'] = new ParseKeyword();
-    }
-
-
-    /**
-     * SAX parser event handlers.
-     */
-
-    public static final Namespace SAX_NS = Namespace.findOrCreate(Symbol.intern("clojure.core"));
-
-    /**
-     * "List opened" event handler.
-     *
-     * Clojure function, accepting single parameter state and returning new state.
-     * (fn [state] state)
-     */
-    public static final Var LIST_OPEN = Var.intern(SAX_NS, Symbol.intern("*seon-list-open*"),  noop).setDynamic();
-
-    /**
-     * "List closed" event handler.
-     *
-     * Clojure function, accepting single parameter state and returning new state.
-     * (fn [state] state)
-     */
-    public static final Var LIST_CLOSE = Var.intern(SAX_NS, Symbol.intern("*seon-list-close*"),  noop).setDynamic();
-
-    /**
-     * "Map opened" event handler.
-     *
-     * Clojure function, accepting single parameter state and returning new state.
-     * (fn [state] state)
-     */
-    public static final Var MAP_OPEN = Var.intern(SAX_NS, Symbol.intern("*seon-map-open*"),  noop).setDynamic();
-
-    /**
-     * "Map closed" event handler.
-     *
-     * Clojure function, accepting single parameter state and returning new state.
-     * (fn [state] state)
-     */
-    public static final Var MAP_CLOSE = Var.intern(SAX_NS, Symbol.intern("*seon-map-close*"),  noop).setDynamic();
-
-    /**
-     * "Map key" event handler.
-     *
-     * Clojure function, accepting two parameters: state and met key name. Must return new state.
-     * (fn [state keyName] state)
-     */
-    public static final Var MAP_KEY = Var.intern(SAX_NS, Symbol.intern("*seon-map-key*"),  noop).setDynamic();
-
-    /**
-     * "Atomic value" event handler, e.g. string, number, integer, boolean, nil.
-     *
-     * Clojure function, accepting two parameters: state and value. Must return new state.
-     * (fn [state value] state)
-     */
-    public static final Var ATOM = Var.intern(SAX_NS, Symbol.intern("*seon-atom*"),  noop).setDynamic();
-
-    protected IFn getHandler(Var name) {
-        Object handler = name.deref();
-        return (handler == null) ? noop : (IFn) handler;
+//        macros[STRING] = new LispReader.StringReader();
+//        macros[COMMENT] = new LispReader.CommentReader();
+//        macros[LIST1] = new LispReader.ListReader();
+//        macros[LIST2] = new LispReader.UnmatchedDelimiterReader();
+//        macros[MAP1] = new LispReader.MapReader();
+//        macros[MAP2] = new LispReader.UnmatchedDelimiterReader();
+//        macros[CHAR] = new LispReader.CharacterReader();
+//        macros[KEYWORD] = new ParseKeyword();
+        macros[NUMBER_PLUS] = macros[NUMBER_MINUS] = macros[DIGIT] = new ParseNumber();
     }
 
     public static Object read(String str) {
-        return read(new PushbackReader(new StringReader(str)));
+        return read(null, str);
     }
 
-    public static Object read(PushbackReader r) {
+    public static Object read(Object state, String str) {
+        return read(state, new PushbackReader(new StringReader(str)));
+    }
+
+    public static Object read(Object state, PushbackReader r) {
         int ch = ReaderUtils.read1(r);
 
         while (CharUtils.isWhitespace(ch)) {
@@ -100,14 +67,9 @@ public class SaxParser {
             throw Util.runtimeException("EOF while reading");
         }
 
-        if (Character.isDigit(ch)) {
-            return ParseNumber.readNumber(r, (char) ch);
-        }
-
         IFn macroFn = getMacro(ch);
         if (macroFn != null) {
-            Object ret = macroFn.invoke(r, (char) ch, PersistentHashMap.EMPTY);
-            return ret;
+            return macroFn.invoke(state, r, (char) ch);
         }
 
         if (ch == '+' || ch == '-') {
@@ -124,21 +86,17 @@ public class SaxParser {
     }
 
     static IFn getMacro(int ch) {
+        if(Character.isDigit(ch)) {
+            return macros[DIGIT];
+        }
         if (ch < macros.length)
             return macros[ch];
         return null;
     }
 
 
-    /**
-     * Stub handler in case user didn't provide his own.
-     */
-    protected static class Noop extends AFn {
-        @Override
-        public Object throwArity(int n) {
-            return null;
-        }
+    @Override
+    public Object invoke(Object state, PushbackReader r, char initch) {
+        return read(state, r);
     }
-
-
 }
