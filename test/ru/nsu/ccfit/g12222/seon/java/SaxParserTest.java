@@ -59,17 +59,17 @@ public class SaxParserTest {
         assertEquals(new Pair(Symbol.class, Symbol.intern("testkwd")), SaxParser.read("testkwd"));
     }
 
-    //
-//    @Test
-//    public void testReadString() throws Exception {
-//        assertEquals("", SaxParser.read("\"\""));
-//        assertEquals("abc", SaxParser.read("\"abc\""));
-//        assertEquals("a\nbc", SaxParser.read("\"a\\nbc\""));
-//        assertEquals("a\nbc", SaxParser.read("\"a\nbc\""));
-//        assertEquals("a\u00FFbc", SaxParser.read("\"a\u00FFbc\""));
-//        assertEquals("a\u00FFbc", SaxParser.read("\"a\\u00FFbc\""));
-//
-//    }
+
+    @Test
+    public void testReadString() throws Exception {
+        assertEquals(new Pair(String.class, ""), SaxParser.read("\"\""));
+        assertEquals(new Pair(String.class, "abc"), SaxParser.read("\"abc\""));
+        assertEquals(new Pair(String.class, "a\nbc"), SaxParser.read("\"a\\nbc\""));
+        assertEquals(new Pair(String.class, "a\nbc"), SaxParser.read("\"a\nbc\""));
+        assertEquals(new Pair(String.class, "a\u00FFbc"), SaxParser.read("\"a\u00FFbc\""));
+        assertEquals(new Pair(String.class, "a\u00FFbc"), SaxParser.read("\"a\\u00FFbc\""));
+
+    }
 
     private static class Pair{
         public final Object a,b;

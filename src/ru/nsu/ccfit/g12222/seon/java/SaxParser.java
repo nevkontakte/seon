@@ -37,7 +37,7 @@ public class SaxParser extends AbstractParser {
     public static final char DIGIT = '0';
 
     static {
-//        macros[STRING] = new LispReader.StringReader();
+        macros[STRING] = new ParseString();
 //        macros[COMMENT] = new LispReader.CommentReader();
 //        macros[LIST1] = new LispReader.ListReader();
 //        macros[LIST2] = new LispReader.UnmatchedDelimiterReader();
