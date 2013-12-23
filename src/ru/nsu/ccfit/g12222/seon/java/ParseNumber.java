@@ -25,7 +25,8 @@ public class ParseNumber extends AbstractParser {
 
         for (; ; ) {
             int ch = ReaderUtils.read1(r);
-            if (ch == -1 || CharUtils.isWhitespace(ch)) {
+            if (ch == -1 || CharUtils.isWhitespace(ch) ||
+                    (SaxParser.getMacro(ch) != null && ! (SaxParser.getMacro(ch) instanceof ParseNumber))) {
                 ReaderUtils.unread(r, ch);
                 break;
             }
