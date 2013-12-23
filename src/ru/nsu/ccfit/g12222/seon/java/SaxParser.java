@@ -6,13 +6,12 @@ import clojure.lang.*;
 import java.io.PushbackReader;
 import java.io.StringReader;
 
-import static ru.nsu.ccfit.g12222.seon.java.LispReader.*;
-
 /**
  * Parse SEON expression in SAX manner.
  */
 public class SaxParser {
     static IFn[] macros = new IFn[256];
+
     static {
         macros['"'] = new EdnReader.StringReader();
         macros[';'] = new EdnReader.CommentReader();
@@ -22,17 +21,57 @@ public class SaxParser {
         macros['}'] = new EdnReader.UnmatchedDelimiterReader();
         macros['\\'] = new EdnReader.CharacterReader();
     }
+
     /**
      * SAX parser event handlers.
      */
 
+    /**
+     * "List opened" event handler.
+     *
+     * Clojure function, accepting single parameter state and returning new state.
+     * (fn [state] state)
+     */
     protected final IFn listOpen;
+
+    /**
+     * "List closed" event handler.
+     *
+     * Clojure function, accepting single parameter state and returning new state.
+     * (fn [state] state)
+     */
     protected final IFn listClose;
 
+    /**
+     * "Map opened" event handler.
+     *
+     * Clojure function, accepting single parameter state and returning new state.
+     * (fn [state] state)
+     */
     protected final IFn mapOpen;
-    protected final IFn mapKey;
+
+    /**
+     * "Map closed" event handler.
+     *
+     * Clojure function, accepting single parameter state and returning new state.
+     * (fn [state] state)
+     */
     protected final IFn mapClose;
 
+    /**
+     * "Map key" event handler.
+     *
+     * Clojure function, accepting two parameters: state and met key name. Must return new state.
+     * (fn [state keyName] state)
+     */
+    protected final IFn mapKey;
+
+    /**
+     * "Atomic value" event handler, e.g. string, number, integer, boolean, nil.
+     *
+     * Clojure function, accepting two parameters: state and value. Must return new state.
+     * (fn [state value] state)
+     */
     protected final IFn atom;
 
     public SaxParser(IFn listOpen, IFn listClose, IFn mapOpen, IFn mapKey, IFn mapClose, IFn atom) {
@@ -51,47 +90,46 @@ public class SaxParser {
     public static Object read(PushbackReader r) {
         int ch = ReaderUtils.read1(r);
 
-        while(CharUtils.isWhitespace(ch))
+        while (CharUtils.isWhitespace(ch)) {
             ch = ReaderUtils.read1(r);
+        }
 
-        if(ch == -1)
-        {
+        if (ch == -1) {
             throw Util.runtimeException("EOF while reading");
         }
 
-        if(Character.isDigit(ch))
-        {
+        if (Character.isDigit(ch)) {
             return ParseNumber.readNumber(r, (char) ch);
         }
 
         IFn macroFn = getMacro(ch);
-        if(macroFn != null)
-        {
+        if (macroFn != null) {
             Object ret = macroFn.invoke(r, (char) ch, PersistentHashMap.EMPTY);
-            //no op macros return the reader
-            if(ret == r)
-                throw Util.runtimeException("This is unexpected..."); // TODO fix this
             return ret;
         }
 
-        if(ch == '+' || ch == '-')
-        {
+        if (ch == '+' || ch == '-') {
             int ch2 = ReaderUtils.read1(r);
-            if(Character.isDigit(ch2))
-            {
+            if (Character.isDigit(ch2)) {
                 ReaderUtils.unread(r, ch2);
                 Object n = ParseNumber.readNumber(r, (char) ch);
-                if(RT.suppressRead())
+                if (RT.suppressRead())
                     return null;
                 return n;
             }
             ReaderUtils.unread(r, ch2);
         }
 
-        String token = readToken(r, (char) ch);
-        if(RT.suppressRead())
+        String token = ParseKeyword.readToken(r, (char) ch);
+        if (RT.suppressRead())
             return null;
-        return interpretToken(token);
+        return ParseKeyword.interpretToken(token);
+    }
+
+    static IFn getMacro(int ch) {
+        if (ch < macros.length)
+            return macros[ch];
+        return null;
     }
 
 
@@ -104,6 +142,7 @@ public class SaxParser {
             return null;
         }
     }
+
     protected final static Noop noop = new Noop();
 
 }

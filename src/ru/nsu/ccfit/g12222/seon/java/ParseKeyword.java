@@ -1,17 +1,16 @@
 package ru.nsu.ccfit.g12222.seon.java;
 
-import clojure.lang.*;
+import clojure.lang.Keyword;
+import clojure.lang.RT;
+import clojure.lang.Symbol;
+import clojure.lang.Util;
 
 import java.io.PushbackReader;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- * Limited reimplementation of clojure.langLispReader optimized for SAX parsing.
- */
-public class LispReader {
+public class ParseKeyword {
     static Pattern symbolPat = Pattern.compile("[:]?([\\D&&[^/]].*/)?(/|[\\D&&[^/]][^/]*)");
-
 
     public static String readToken(PushbackReader r, char initch) {
         StringBuilder sb = new StringBuilder();
@@ -25,14 +24,6 @@ public class LispReader {
             }
             sb.append((char) ch);
         }
-    }
-
-    static private boolean isTerminatingMacro(int ch) {
-        return (ch != '#' && ch != '\'' && ch != '%' && isMacro(ch));
-    }
-
-    static private boolean isMacro(int ch) {
-        return (ch < SaxParser.macros.length && SaxParser.macros[ch] != null);
     }
 
     public static Object interpretToken(String s) {
@@ -76,10 +67,7 @@ public class LispReader {
         return null;
     }
 
-    static IFn getMacro(int ch){
-        if(ch < SaxParser.macros.length)
-            return SaxParser.macros[ch];
-        return null;
+    static boolean isTerminatingMacro(int ch) {
+        return (ch != '#' && ch != '\'' && (SaxParser.getMacro(ch) != null));
     }
-
 }

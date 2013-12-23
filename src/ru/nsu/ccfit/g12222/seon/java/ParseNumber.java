@@ -9,6 +9,8 @@ import java.math.BigInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ru.nsu.ccfit.g12222.seon.java.SaxParser.getMacro;
+
 /**
  * Number parser utility class
  */
@@ -25,7 +27,7 @@ public class ParseNumber {
 
         for (; ; ) {
             int ch = ReaderUtils.read1(r);
-            if (ch == -1 || CharUtils.isWhitespace(ch) /*|| isMacro(ch)*/) {
+            if (ch == -1 || CharUtils.isWhitespace(ch) || (getMacro(ch) != null)) {
                 ReaderUtils.unread(r, ch);
                 break;
             }
