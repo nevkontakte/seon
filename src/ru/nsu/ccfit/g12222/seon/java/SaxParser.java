@@ -12,6 +12,16 @@ import static ru.nsu.ccfit.g12222.seon.java.LispReader.*;
  * Parse SEON expression in SAX manner.
  */
 public class SaxParser {
+    static IFn[] macros = new IFn[256];
+    static {
+        macros['"'] = new EdnReader.StringReader();
+        macros[';'] = new EdnReader.CommentReader();
+        macros['('] = new EdnReader.ListReader();
+        macros[')'] = new EdnReader.UnmatchedDelimiterReader();
+        macros['{'] = new EdnReader.MapReader();
+        macros['}'] = new EdnReader.UnmatchedDelimiterReader();
+        macros['\\'] = new EdnReader.CharacterReader();
+    }
     /**
      * SAX parser event handlers.
      */
@@ -39,10 +49,10 @@ public class SaxParser {
     }
 
     public static Object read(PushbackReader r) {
-        int ch = read1(r);
+        int ch = ReaderUtils.read1(r);
 
-        while(isWhitespace(ch))
-            ch = read1(r);
+        while(CharUtils.isWhitespace(ch))
+            ch = ReaderUtils.read1(r);
 
         if(ch == -1)
         {
@@ -51,7 +61,7 @@ public class SaxParser {
 
         if(Character.isDigit(ch))
         {
-            return readNumber(r, (char) ch);
+            return ParseNumber.readNumber(r, (char) ch);
         }
 
         IFn macroFn = getMacro(ch);
@@ -66,16 +76,16 @@ public class SaxParser {
 
         if(ch == '+' || ch == '-')
         {
-            int ch2 = read1(r);
+            int ch2 = ReaderUtils.read1(r);
             if(Character.isDigit(ch2))
             {
-                unread(r, ch2);
-                Object n = readNumber(r, (char) ch);
+                ReaderUtils.unread(r, ch2);
+                Object n = ParseNumber.readNumber(r, (char) ch);
                 if(RT.suppressRead())
                     return null;
                 return n;
             }
-            unread(r, ch2);
+            ReaderUtils.unread(r, ch2);
         }
 
         String token = readToken(r, (char) ch);
