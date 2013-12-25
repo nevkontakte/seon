@@ -1,4 +1,5 @@
-(ns ru.nsu.ccfit.g12222.seon.core)
+(ns ru.nsu.ccfit.g12222.seon.core
+  (:import (ru.nsu.ccfit.g12222.seon.java SaxParser)))
 
 (declare seon?)
 
@@ -52,3 +53,7 @@
     (read-string expr)))
 
 
+(defn seon-sax
+  "SAX-style parser for SEON expressions."
+  [initialState string]
+  (SaxParser/read initialState string ))
