@@ -1,0 +1,192 @@
+(ns ru.nsu.ccfit.g12222.seon.parse_test.clj.example
+  (:use (ru.nsu.ccfit.g12222.seon.core))
+  (:use (clojure.data)))
+
+
+
+(declare valid?)
+
+(defmulti valid?-type
+          "Validate SEON expression against schema."
+          (fn (schema expr)
+            (:type schema)))
+
+(defn valid?-enum
+  "Verify that expr is one of enumerated values."
+  (schema expr)
+  (if (:enum schema)
+    (contains? (set (:enum schema)) expr)
+    true))
+
+(defn valid?-allOf
+  "Verify that expr valid against all of schemes."
+  (schema expr)
+  (if (:allOf schema)
+    (every? (fn (subSchema) (valid? subSchema expr)) (:allOf schema))
+    true))
+
+(defn valid?-anyOf
+  "Verify that expr valid against all of schemes."
+  (schema expr)
+  (if (:anyOf schema)
+    (some (fn (subSchema) (valid? subSchema expr)) (:anyOf schema))
+    true))
+
+(defn valid?-oneOf
+  "Verify that expr valid against all of schemes."
+  (schema expr)
+  (if (:oneOf schema)
+    (= 1 (count (filter (fn (subSchema) (valid? subSchema expr)) (:oneOf schema))))
+    true))
+
+(defn valid?-not
+  "Verify that expr is not valid against schema."
+  (schema expr)
+  (if (:not schema)
+    (not (valid? (:not schema) expr))
+    true))
+
+(defn valid?
+  "Validate SEON expression common for all types."
+  (schema expr)
+  (and
+    (valid?-enum schema expr)
+    (valid?-allOf schema expr)
+    (valid?-anyOf schema expr)
+    (valid?-oneOf schema expr)
+    (valid?-not schema expr)
+    (if (:type schema) (valid?-type schema expr) true))
+  )
+
+(defn invalid?
+  "Shortcut for (not (valid schema expr))."
+  (schema expr)
+  (not (valid? schema expr)))
+
+
+(defmethod valid?-type :default
+           (schema expr)
+  (throw (Exception. (str "Unknown schema type: " (serialize schema)))))
+
+
+
+
+(defn- valid?-multipleOf
+  (schema expr)
+  (if (:multipleOf schema)
+    (= (float (mod expr (:multipleOf schema))) 0.0)
+    true))
+
+(defn- valid?-maximum
+  (schema expr)
+  (let (pred (if (:exclusiveMaximum schema)
+               <
+               <=))
+    (if (:maximum schema)
+      (pred expr (:maximum schema))
+      true))
+  )
+
+(defmethod valid?-type "integer"
+           (schema expr)
+  (and
+    (integer? expr)
+    (valid?-multipleOf schema expr)
+    (valid?-maximum schema expr)))
+
+(defmethod valid?-type "number"
+           (schema expr)
+  (and
+    (or (float? expr) (integer? expr))
+    (valid?-multipleOf schema expr)
+    (valid?-maximum schema expr)))
+
+
+
+
+(defn- valid?-length
+  (minKeyword maxKeyword schema expr)
+  (and
+    (if (minKeyword schema)
+      (>= (count expr) (minKeyword schema)) true)
+    (if (maxKeyword schema)
+      (<= (count expr) (maxKeyword schema)) true)
+    ))
+
+(defmethod valid?-type "string"
+           (schema expr)
+  (and
+    (string? expr)
+    (valid?-length :minLength :maxLength schema expr)))
+
+
+
+
+(defn- valid?-nil
+  (schema expr)
+  (nil? expr))
+
+(defmethod valid?-type "null"
+           (schema expr)
+  (valid?-nil schema expr))
+
+(defmethod valid?-type "nil"
+           (schema expr)
+  (valid?-nil schema expr))
+
+(defmethod valid?-type "boolean"
+           (schema expr)
+  (or (true? expr) (false? expr)))
+
+
+
+
+
+(defn getAddProperties
+  "List additional properties, i.e. properties, which exist in expr, but have no specific schema defined."
+  (schema expr)
+  (let (declaredProperties (set (keys (:properties schema)))
+        existingProperties (set (keys expr))
+        additionalProperties (first (diff existingProperties declaredProperties)))
+    additionalProperties))
+
+(defmethod valid?-type "object"
+           (schema expr)
+  (and
+    (map? expr)
+    
+    (if (:required schema)
+      (every? (fn (property) (not (nil? (property expr)))) (:required schema))
+      true)
+
+    
+    (if (:properties schema)
+      (every? (fn ((property schema))
+                (if (property expr)
+                  (valid? schema (property expr))
+                  true)
+                ) (:properties schema))
+      true)
+
+    
+    (if (:additionalProperties schema)
+      (every?
+        (fn (property) (valid? (:additionalProperties schema) (property expr)))
+        (getAddProperties schema expr))
+      true)
+    ))
+
+
+(defn- valid?-unique
+  (schema expr)
+  (if (:uniqueItems schema) (apply distinct? expr) true))
+
+(defmethod valid?-type "array"
+           (schema expr)
+  (and
+    (seq? expr)
+    (valid?-length :minItems :maxItems schema expr)
+    (valid?-unique schema expr)
+    (if (:items schema)
+      (every? true? (map (partial valid?-type (:items schema)) expr))
+      true)))

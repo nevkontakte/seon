@@ -1,5 +1,6 @@
 package ru.nsu.ccfit.g12222.seon.java;
 
+import clojure.lang.LineNumberingPushbackReader;
 import clojure.lang.PersistentHashMap;
 import clojure.lang.Util;
 import clojure.lang.Var;
@@ -10,6 +11,10 @@ public class ParseMap extends AbstractParser {
 
     @Override
     public Object invoke(Object state, PushbackReader r, char initch) {
+        final int firstline =
+                (r instanceof LineNumberingPushbackReader) ?
+                        ((LineNumberingPushbackReader) r).getLineNumber() : -1;
+
         state = getHandler(MAP_OPEN).invoke(state);
         for(;;) {
             //
@@ -54,7 +59,11 @@ public class ParseMap extends AbstractParser {
             }
 
             if(ch == '}') {
-                throw Util.runtimeException("Map literal must contain an even number of forms");
+                if (firstline < 0) {
+                    throw Util.runtimeException("Map literal must contain an even number of forms");
+                } else {
+                    throw Util.runtimeException("Map literal must contain an even number of forms, starting at line " + firstline);
+                }
             }
 
             ReaderUtils.unread(r, ch);

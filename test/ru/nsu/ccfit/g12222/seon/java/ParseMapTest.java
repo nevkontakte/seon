@@ -75,8 +75,18 @@ public class ParseMapTest {
         );
 
         assertArrayEquals(
+                new Object[]{'{', '}'},
+                ((List) SaxParser.read(new LinkedList(), "{ , , }")).toArray()
+        );
+
+        assertArrayEquals(
                 new Object[]{'{', "KEY", Keyword.intern("k1"), "ATOM", 123l, '}'},
                 ((List) SaxParser.read(new LinkedList(), "{ :k1 123 }")).toArray()
+        );
+
+        assertArrayEquals(
+                new Object[]{'{', "KEY", Keyword.intern("k1"), "ATOM", 123l, '}'},
+                ((List) SaxParser.read(new LinkedList(), "{ :k1, 123, }")).toArray()
         );
 
         assertArrayEquals(
