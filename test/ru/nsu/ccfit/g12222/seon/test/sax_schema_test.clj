@@ -103,3 +103,52 @@
           "(1 2 3 4 5 6)"))
     )
   )
+
+(deftest sax-valid?-map-test
+  (testing "Object validation."
+    (is (sax-valid?
+          {:type "object"}
+          "{}"))
+    (is (sax-valid?
+          {:type       "object"
+           :properties {:nested {:type "object"}}}
+          "{}"))
+    (is (not (sax-valid?
+               {:type       "object"
+                :properties {:nested {:type "object"}}
+                :required   [:nested]}
+               "{}")))
+    (is (sax-valid?
+          {:type       "object"
+           :properties {:nested {:type "object"}}}
+          "{:nested {}}"))
+    (is (sax-valid?
+          {:type       "object"
+           :properties {:nested {:type "object"}}
+           :required   [:nested]}
+          "{:nested {}}"))
+    (is (sax-invalid?
+          {:type       "object"
+           :properties {:nested {:type "object"}}
+           :required   [:nested]}
+          "{:nested 0}"))
+    (is (sax-valid?
+          {:type "object"
+           :properties {:a {:type "string"}}
+           :additionalProperties {:type "integer"}}
+          "{:a \"string\" :b 1}"))
+    (is (sax-valid?
+          {:type "object"
+           :additionalProperties {:type "integer"}}
+          "{:a 1 :b 2}"))
+    (is (sax-invalid?
+          {:type "object"
+           :properties {:a {:type "string"}}
+           :additionalProperties {:type "integer"}}
+          "{:a \"string\" :b \"1\"}"))
+    (is (sax-invalid?
+          {:type "object"
+           :additionalProperties {:type "integer"}}
+          "{:a \"1\" :b 2}"))
+    )
+  )

@@ -118,13 +118,53 @@
         ]
     state))
 
+(defn sax-valid?-map-open
+  [state]
+  (let [schema (sc state)
+        type (:type schema "object")
+        state (v state (= type "object"))
+        state (sc-push state {})
+        newFrame {
+                   ::props (if (:required schema) #{} nil)
+                   }
+        state (data-push state newFrame)]
+    state))
+
+(defn sax-valid?-map-close
+  [state]
+  (let [state (sc-pop state)
+
+        state (if (and (data state ::props) (:required (sc state)))
+                (v state (clojure.set/superset?
+                           (data state ::props)
+                           (set (:required (sc state)))))
+                state)
+
+        state (data-pop state)]
+    state))
+
+(defn sax-valid?-map-key
+  [state key]
+  (let [state (sc-pop state)
+        schema (sc state)
+        newSchema (or
+                    (key (:properties schema))
+                    (:additionalProperties schema)
+                    {})
+        state (sc-push state newSchema)
+        state (data-alter-if-exists state ::props #(conj % key))]
+    state))
+
 (defn sax-valid?
   "Validate string using sax-parser."
   [schema string]
   (binding
       [*seon-atom* sax-valid?-atom
        *seon-list-open* sax-valid?-list-open
-       *seon-list-close* sax-valid?-list-close]
+       *seon-list-close* sax-valid?-list-close
+       *seon-map-open* sax-valid?-map-open
+       *seon-map-close* sax-valid?-map-close
+       *seon-map-key* sax-valid?-map-key]
     (v? (seon-sax (initial-state schema) string))))
 
 (defn sax-invalid?
